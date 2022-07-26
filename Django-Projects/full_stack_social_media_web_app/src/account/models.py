@@ -37,7 +37,7 @@ class MyAccountManager(BaseUserManager):
 
 
 
-def get_profile_image_filepath(self):
+def get_profile_image_filepath(self, filepath):
     return f'profile_images/{self.pk}/profile_image.png'
 
 def get_default_profile_image():
@@ -66,6 +66,7 @@ class Account(AbstractBaseUser):
 
     def get_profile_image_filename(self):
         return str(self.profile_image)[str(self.profile_image).index(f'profile_images/{self.pk}/'):]
+
     def has_perm(self, perm, obj=None):
         return self.is_admin
 
