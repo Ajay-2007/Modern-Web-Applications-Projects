@@ -10,7 +10,7 @@
         </h5>
 
         <!-- col2 -->
-        <form action="" class="search-bar justify-content-start">
+        <form action="" class="search-bar justify-content-start" onsubmit="return executeQuery();">
             <input type="text" class="form-control" name="q" id="id_q_large" placeholder="Search...">
         </form>
 
@@ -79,8 +79,8 @@
             <a class="p-2 text-dark" href="{% url 'home' %}">Home</a>
         </h5>
         <!-- row2 -->
-        <form action="" class="search-bar justify-content-start">
-            <input type="text" class="form-control" name="q" id="id_q_small" placeholder="Search...">
+        <form action="" class="search-bar justify-content-start" onsubmit="return executeQuery();">
+            <input type="text" class="form-control" name="q" id="id_q_small" placeholder="Search..." >
         </form>
 
         <!-- row3 -->
@@ -109,3 +109,15 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+    function executeQuery() {
+        var query = document.getElementById("id_q_small").value
+        if (query == "") {
+            query = document.getElementById("id_q_large").value
+        }
+
+        window.location.replace("{% url 'search' %}?q=" + query)
+        return false;
+    }
+</script>
