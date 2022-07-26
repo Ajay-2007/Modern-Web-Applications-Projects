@@ -1,0 +1,2 @@
+# login to postgres database
+sudo -i -u postgres
