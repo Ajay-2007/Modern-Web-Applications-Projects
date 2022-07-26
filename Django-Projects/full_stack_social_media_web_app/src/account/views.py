@@ -150,7 +150,7 @@ def edit_account_view(request, *args, **kwargs):
         form = AccountUpdateForm(request.POST, request.FILES, instance=request.user)
         if form.is_valid():
             # delete the old profile image so the name is preserved
-            account.profile_image.delete()
+            # account.profile_image.delete()
             form.save()
             return redirect("account:view", user_id=account.pk)
         else:
@@ -212,6 +212,34 @@ def crop_image(request, *args, **kwargs):
             # base64 version of the image
             imageString = request.POST.get("image")
             url = save_temp_profile_image_from_base64String(imageString, user)
+            img = cv2.imread(url)
+
+            cropX = int(float(str(request.POST.get("cropX"))))
+            cropY = int(float(str(request.POST.get("cropY"))))
+            cropWidth = int(float(str(request.POST.get("cropWidth"))))
+            cropHeight = int(float(str(request.POST.get("cropHeight"))))
+
+            if cropX < 0:
+                cropX = 0
+            if cropY < 0:
+                cropY = 0
+            
+            crop_img = img[cropY : cropY + cropHeight, cropX:cropX + cropWidth]
+
+            cv2.imwrite(url, crop_img)
+
+            user.profile_image.delete()
+            
+            user.profile_image.save("profile_image.png", files.File(open(url, "rb")))
+            user.save()
+
+            payload['result'] = "success"
+            payload['cropped_profile_image'] = user.profile_image.url
+
+            os.remove(url)
 
         except Exception as e:
-            raise e    
+            payload['result'] = "error"
+            payload['exception'] = str(e)
+        
+    return HttpResponse(json.dumps(payload), content_type="application/json")

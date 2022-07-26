@@ -84,12 +84,11 @@ class AccountUpdateForm(forms.ModelForm):
         except Account.DoesNotExist:
             return username
 
-
     def save(self, commit=True):
         account = super(AccountUpdateForm, self).save(commit=False)
         account.username = self.cleaned_data['username']
         account.email = self.cleaned_data['email'].lower()
-        account.profile_image = self.cleaned_data['profile_image']
+        # account.profile_image = self.cleaned_data['profile_image']
         account.hide_email = self.cleaned_data['hide_email']
 
         if commit:
