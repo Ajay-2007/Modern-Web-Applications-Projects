@@ -25,6 +25,9 @@ SECRET_KEY = '6&d#cgj-592ubk8qnj^^=rxg9&sd12xsg$1@6cev%0_ov*+-nv'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # development ONLY
+
 ALLOWED_HOSTS = []
 
 # it tells django that the default model that the account we create is account.Account model
