@@ -2,9 +2,22 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.contrib.auth import login, authenticate, logout
 from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.storage import FileSystemStorage
+import os
+import cv2
+import json
+import base64
+import requests
+from django.core import files
+
+
 from account.forms import AccountUpdateForm, RegistrationForm, AccountAuthenticationForm
 from account.models import Account
 
+
+
+TEMPL_PROFILE_IMAGE_NAME = "templ_profile_image.png"
 
 def register_view(request, *args, **kwargs):
     user = request.user
@@ -165,3 +178,40 @@ def edit_account_view(request, *args, **kwargs):
     
     context['DATA_UPLOAD_MAX_MEMORY_SIZE'] = settings.DATA_UPLOAD_MAX_MEMORY_SIZE
     return render(request, "account/edit_account.html", context)
+
+def save_temp_profile_image_from_base64String(imageString, user):
+    INCORRECT_PADDING_EXCEPTION = "Incorrect padding"
+
+    try:
+        if not os.path.exists(settings.TEMP):
+            os.mkdir(settings.TEMP)
+        if not os.path.exists(f"{settings.TEMP}/{str(user.pk)}"):
+            os.mkdir(f"{settings.TEMP}/{str(user.pk)}")
+        
+        url = os.path.join(f"{settings.TEMP}/{user.pk}", TEMPL_PROFILE_IMAGE_NAME)
+        storage = FileSystemStorage(location=url)
+        image = base64.b64decode(imageString)
+
+        with storage.open('', 'wb+') as destination:
+            destination.write(image)
+            destination.close()
+        return url
+    except Exception as e:
+        if str(e) == INCORRECT_PADDING_EXCEPTION:
+            imageString += "=" * ((4 - len(imageString) % 4) % 4)
+            return save_temp_profile_image_from_base64String(imageString, user)
+    return None
+
+
+def crop_image(request, *args, **kwargs):
+    payload = {}
+    user = request.user
+
+    if request.POST and user.is_authenticated:
+        try:
+            # base64 version of the image
+            imageString = request.POST.get("image")
+            url = save_temp_profile_image_from_base64String(imageString, user)
+
+        except Exception as e:
+            raise e    
