@@ -54,7 +54,7 @@
                         <!-- account -->
                         <div class="btn-group droplef">
                             <img class="account-image rounded-circle m-auto d-block dropdown-toggle" id="id_profile_links" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false" src="{% static 'codingwithmitch/dummy_image.png' %}" alt="codingwithmitch logo" width="40" height="40">
+                            aria-haspopup="true" aria-expanded="false" src="{{ request.user.profile_image.url }}" alt="codingwithmitch logo" width="40" height="40">
                             <div class="dropdown-menu" aria-labelledby="id_profile_links">
                                 <a class="dropdown-item" href="#">Account</a>
                                 <a class="dropdown-item" href="#">Logout</a>
@@ -94,7 +94,7 @@
                             <!-- account -->
                             <div class="btn-group droplef">
                                 <img class="account-image rounded-circle m-auto d-block dropdown-toggle" id="id_profile_links" data-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="false" src="{% static 'codingwithmitch/dummy_image.png' %}" alt="codingwithmitch logo" width="40" height="40">
+                                aria-haspopup="true" aria-expanded="false" src="{{ request.user.profile_image.url }}" alt="codingwithmitch logo" width="40" height="40">
                                 <div class="dropdown-menu" aria-labelledby="id_profile_links">
                                     <a class="dropdown-item" href="#">Account</a>
                                     <a class="dropdown-item" href="#">Logout</a>

@@ -27,12 +27,18 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+# it tells django that the default model that the account we create is account.Account model
+AUTH_USER_MODEL = "account.Account"
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.AllowAllUsersModelBackend',
+    'account.backends.CaseInsensitiveModelBackend'
+)
 # Application definition
 
 INSTALLED_APPS = [
     # My Apps
     'personal',
+    'account',
 
     # Third party apps
     'django.contrib.admin',
