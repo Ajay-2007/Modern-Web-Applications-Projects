@@ -123,7 +123,6 @@ def account_view(request, *args, **kwargs):
         # if the user is authenticated and the user is not looking at it's own profile
         if user.is_authenticated and user != account:
             is_self = False
-
             if friends.filter(pk=user.id):
                 is_friend = True
             else:
@@ -134,7 +133,7 @@ def account_view(request, *args, **kwargs):
                     context['pending_friend_request_id'] = get_friend_request_or_false(sender=account, receiver=user).id
                 # CASE2: Request has been sent from YOU to THEM:
                 # FriendRequestStatus.YOU_SENT_TO_THEM
-                if get_friend_request_or_false(sender=user, receiver=account) != False:
+                elif get_friend_request_or_false(sender=user, receiver=account) != False:
                     request_sent = FriendRequestStatus.YOU_SENT_TO_THEM.value
                 # CASE 3: No request has been sent. FriendRequestStatus.NO_REQUEST_SENT
                 else:
@@ -154,7 +153,6 @@ def account_view(request, *args, **kwargs):
         context['BASE_URL'] = settings.BASE_URL
         context['request_sent'] = request_sent
         context['friend_requests'] = friend_requests
-        # print(context)
         return render(request, "account/account.html", context)
 
 def account_search_view(request, *args, **kwargs):
