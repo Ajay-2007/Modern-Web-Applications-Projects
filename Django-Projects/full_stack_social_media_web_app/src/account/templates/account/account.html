@@ -162,7 +162,7 @@
 			<div class="card m-2 px-4 pb-4">
 				<!-- Friend requests -->
 		  		<div class="d-flex flex-column pt-4">
-					<a href="#">
+					<a href="{% url 'friend:friend-requests' user_id=id %}">
 						<div class="d-flex flex-row align-items-center justify-content-center icon-container">
 							<span class="material-icons mr-2 person-add-icon">person_add</span><span class="friend-text">Friend Requests ({{ friend_requests|length }})</span>
 						</div>
@@ -217,14 +217,14 @@
 	var sendFriendRequestBtn = document.getElementById("id_send_friend_request_btn")
 	if (sendFriendRequestBtn != null){
 		sendFriendRequestBtn.addEventListener("click", function(){
-			//sendFriendRequest("{{id}}", onFriendRequestSent)
+			sendFriendRequest("{{id}}", onFriendRequestSent)
 		})
 	}
 
 	var cancelFriendRequestBtn = document.getElementById("id_cancel_friend_request_btn")
 	if(cancelFriendRequestBtn != null){
 		cancelFriendRequestBtn.addEventListener("click", function(){
-			//cancelFriendRequest("{{id}}", onFriendRequestCancelled)
+			// cancelFriendRequest("{{id}}", onFriendRequestCancelled)
 		})
 	}
 
@@ -245,7 +245,8 @@
 	
 </script>
 
-{#% include 'snippets/send_friend_request.html' %#}
+{% comment %} {% include 'snippets/send_friend_request.html' %} {% endcomment %}
+{% include 'friend/snippets/send_friend_request.html' %}
 {#% include 'snippets/accept_friend_request.html' %#}
 {#% include 'snippets/decline_friend_request.html' %#}
 {#% include 'snippets/cancel_friend_request.html' %#}

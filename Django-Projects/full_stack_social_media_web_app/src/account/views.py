@@ -118,7 +118,7 @@ def account_view(request, *args, **kwargs):
         is_self = True
         is_friend = False
         request_sent = FriendRequestStatus.NO_REQUEST_SENT.value
-        friend_request = None
+        friend_requests = None
         user = request.user
         # if the user is authenticated and the user is not looking at it's own profile
         if user.is_authenticated and user != account:
@@ -134,7 +134,7 @@ def account_view(request, *args, **kwargs):
                     context['pending_friend_request_id'] = get_friend_request_or_false(sender=account, receiver=user).id
                 # CASE2: Request has been sent from YOU to THEM:
                 # FriendRequestStatus.YOU_SENT_TO_THEM
-                if get_friend_request_or_false(sender=account, receiver=user) != False:
+                if get_friend_request_or_false(sender=user, receiver=account) != False:
                     request_sent = FriendRequestStatus.YOU_SENT_TO_THEM.value
                 # CASE 3: No request has been sent. FriendRequestStatus.NO_REQUEST_SENT
                 else:
@@ -144,17 +144,17 @@ def account_view(request, *args, **kwargs):
             is_self = False
         else:
             try:
-                friend_request = FriendRequest.objects.filter(receiver=user, is_active=True)
+                friend_requests = FriendRequest.objects.filter(receiver=user, is_active=True)
             except:
                 pass
 
         # Set the template variables to the values
         context['is_self'] = is_self
         context['is_friend'] = is_friend
-        context['BASE_URL'] = settings.BASE_DIR
+        context['BASE_URL'] = settings.BASE_URL
         context['request_sent'] = request_sent
-        context['friend_requests'] = friend_request
-
+        context['friend_requests'] = friend_requests
+        # print(context)
         return render(request, "account/account.html", context)
 
 def account_search_view(request, *args, **kwargs):

@@ -19,6 +19,7 @@ class FriendList(models.Model):
         """
         if not account in self.friends.all():
             self.friends.add(account)
+            self.save()
     
     def remove_friend(self, account):
         """
@@ -39,7 +40,7 @@ class FriendList(models.Model):
 
         # Remove friend from removee friend list
         friends_list = FriendList.object.get(user=removee)
-        friends_list.remove_friend(self.user)
+        friends_list.remove_friend(remover_friends_list.user)
 
     def is_mutual_friend(self, friend):
         """
@@ -62,7 +63,7 @@ class FriendRequest(models.Model):
 
     sender                          = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="sender")
     receiver                        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="receiver")
-    is_active                       = models.BooleanField(blank=True, null=False, default=False)
+    is_active                       = models.BooleanField(blank=False, null=False, default=True)
     timestamp                       = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
