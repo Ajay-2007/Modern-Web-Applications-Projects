@@ -6,6 +6,39 @@ from account.models import Account
 from friend.models import FriendRequest, FriendList
 
 
+def friend_list_view(request, *args, **kwargs):
+    context = {}
+    user = request.user
+    if user.is_authenticated:
+        user_id = kwargs.get("user_id")
+        if user_id:
+            try:
+                this_user = Account.objects.get(pk=user_id)
+                context['this_user'] = this_user
+            except Account.DoesNotExist:
+                raise HttpResponse("That user does not exist.")
+
+            try:
+                friend_list = FriendList.objects.get(user=this_user)
+            except FriendList.DoesNotExist:
+                return HttpResponse(f"Could not find a friends list for {this_user.username}")
+
+            # Must be friends to view a friends list
+            if user != this_user:
+                if not user in friend_list.friends.all():
+                    return HttpResponse("You must be friends to view their friends list.")
+            
+            friends = [] # [(account1, True), (account2, False), ...]
+            auth_user_friend_list = FriendList.objects.get(user=user)
+            for friend in friend_list.friends.all():
+                friends.append((friend, auth_user_friend_list.is_mutual_friend(friend)))
+            context['friends'] = friends
+    else:
+        return HttpResponse("You must be friends to view their friends list.")
+    
+    return render(request, "friend/snippets/friend_list.html", context)
+
+
 def friend_requests(request, *args, **kwargs):
     context = {}
     user = request.user
