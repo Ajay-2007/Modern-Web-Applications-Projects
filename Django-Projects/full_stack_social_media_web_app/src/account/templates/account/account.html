@@ -141,7 +141,9 @@
 						Friends
 						</button>
 						<div class="dropdown-menu" aria-labelledby="id_friends_toggle">
-							<a class="dropdown-item" href="#" onclick="removeFriend('{{id}}', onFriendRemoved)">Unfriend</a>
+							<a class="dropdown-item" href="#" onclick="removeFriend('{{id}}', onFriendRemoved)"  id="id_unfriend_btn">
+								Unfriend
+							</a>
 						</div>
 					</div>
 				{% endif %}
@@ -228,10 +230,11 @@
 		})
 	}
 
-	var removeFriendBtn = document.getElementById("id_unfriend_btn")
+	var removeFriendBtn = document.getElementById("id_unfriend_btn_2")
+	console.log(removeFriendBtn)
 	if (removeFriendBtn != null){
 		removeFriendBtn.addEventListener("click", function(){
-			//removeFriend("{{id}}", onFriendRemoved)
+			removeFriend("{{id}}", onFriendRemoved)
 		})
 	}
 
@@ -250,7 +253,7 @@
 {% include 'friend/snippets/accept_friend_request.html' %}
 {#% include 'snippets/decline_friend_request.html' %#}
 {#% include 'snippets/cancel_friend_request.html' %#}
-{#% include 'snippets/remove_friend.html' %#}
+{% include 'friend/snippets/remove_friend.html' %}
 {#% include 'chat/create_or_return_private_chat.html' %#}
 
 

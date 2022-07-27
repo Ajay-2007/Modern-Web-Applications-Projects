@@ -33,14 +33,14 @@ class FriendList(models.Model):
         """
         Initiate the action of unfriending someone.
         """
-        remover_friends_list = self # person terminating the friendship
+        remove_friends_list = self # person terminating the friendship
 
         # Remove friend from remover friend list
-        remover_friends_list.remove_friend(removee)
+        remove_friends_list.remove_friend(removee)
 
         # Remove friend from removee friend list
-        friends_list = FriendList.object.get(user=removee)
-        friends_list.remove_friend(remover_friends_list.user)
+        friends_list = FriendList.objects.get(user=removee)
+        friends_list.remove_friend(remove_friends_list.user)
 
     def is_mutual_friend(self, friend):
         """
