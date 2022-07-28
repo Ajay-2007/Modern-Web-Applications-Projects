@@ -11,7 +11,6 @@ application = ProtocolTypeRouter({
             URLRouter([
                 path("public_chat/<room_id>/", PublicChatConsumer)
             ])
-            
         )
     )}
 )

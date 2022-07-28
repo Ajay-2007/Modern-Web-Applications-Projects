@@ -5,6 +5,6 @@ from django.conf import settings
 def home_screen_view(request, *args, **kwargs):
     context = {}
     context['debug_mode'] = settings.DEBUG
-    context['room_id'] = 3
+    context['room_id'] = 5
 
     return render(request, "personal/home.html", context)

@@ -18,11 +18,12 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
         Called when the WebSocket closes for any reason
         """
         print("PublicChatConsumer: disconnect")
+        pass
         
     
     async def receive_json(self, content):
         """
         Called when we get a text frame, Channels will JSON-decode the payload for us and pass it as the first argument.
         """
-        command = content.get("comman", None)
+        command = content.get("command", None)
         print("PublicChatConsumer: receive_json: " + str(command))
