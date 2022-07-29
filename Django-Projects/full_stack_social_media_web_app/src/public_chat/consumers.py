@@ -10,10 +10,9 @@ from django.utils import timezone
 from datetime import datetime
 
 from public_chat.models import PublicChatRoom, PublicRoomChatMessage
+from public_chat.constants import *
 
 
-MSG_TYPE_MESSAGE = 0 # for standard messages
-DEFAULT_ROOM_CHAT_MESSAGE_PAGE_SIZE = 10
 User = get_user_model()
 
 
@@ -163,6 +162,15 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
             "username": self.scope['user'].username,
         })
 
+        num_connected_users = get_num_connected_users(room)
+        await self.channel_layer.group_send(
+            room.group_name,
+            {
+                "type": "connected.user.count", # connected_user_count
+                "connected_user_count": num_connected_users,
+            }
+        )
+
     async def leave_room(self, room_id):
         """
         Called by receive_json when someone sent a LEAVE command
@@ -185,6 +193,15 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
         await self.channel_layer.group_discard(
             room.group_name,
             self.channel_name,
+        )
+
+        num_connected_users = get_num_connected_users(room)
+        await self.channel_layer.group_send(
+            room.group_name,
+            {
+                "type": "connected.user.count", # connected_user_count
+                "connected_user_count": num_connected_users,
+            }
         )
 
 
@@ -223,6 +240,24 @@ class PublicChatConsumer(AsyncJsonWebsocketConsumer):
         await self.send_json({
             "display_progress_bar": is_displayed
         })
+
+    async def connected_user_count(self, event):
+        """
+        Called to send the number of connected users to the room.
+        This number is displayed in the room so other users know how mnay users are connected to the chat.
+        """
+        print("PublicChatConsumer: connect_user_count: count: " + str(event['connected_user_count']))
+        await self.send_json({
+            "msg_type": MSG_TYPE_CONNECTED_USER_COUNT,
+            "connected_user_count": event['connected_user_count']
+        })
+
+
+def get_num_connected_users(room):
+    if room.users:
+        return len(room.users.all())
+    return 0
+
 
 def is_authenticated(user):
     if user.is_authenticated:
