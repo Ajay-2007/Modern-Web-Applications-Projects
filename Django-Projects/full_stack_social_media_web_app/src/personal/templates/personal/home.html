@@ -117,7 +117,7 @@ PUBLIC CHAT
         }
 
         if (data.msg_type == 0) {
-            appendChatMessage(data)
+            appendChatMessage(data, true, true)
         }
 
         if (data.messages_payload) {
@@ -206,7 +206,7 @@ PUBLIC CHAT
         if(messages != null && messages != "undefined" && messages != "None") {
             setPageNumber(new_page_number)
             messages.forEach(function(message) {
-                appendChatMessage(message)
+                appendChatMessage(message, true, false)
             })
         }
         else {
@@ -221,7 +221,7 @@ PUBLIC CHAT
         }
     })
 
-    function appendChatMessage(data) {
+    function appendChatMessage(data, maintainPosition, isNewMessage) {
 
         console.log("callled appendChatMessage", data)
         message = data['message']
@@ -233,10 +233,10 @@ PUBLIC CHAT
         var msg = message + "\n"
         var username = uName + ": "
 
-        createChatMessageElement(msg, username, profile_image, user_id, timestamp)
+        createChatMessageElement(msg, username, profile_image, user_id, timestamp, maintainPosition, isNewMessage)
     }
 
-    function createChatMessageElement(msg, username, profile_image, user_id, timestamp) {
+    function createChatMessageElement(msg, username, profile_image, user_id, timestamp, maintainPosition, isNewMessage) {
         var chatLog = document.getElementById("id_chat_log")
 
         var newMessageDiv = document.createElement("div")
@@ -293,9 +293,16 @@ PUBLIC CHAT
 
         newMessageDiv.appendChild(div1)
 
-        // so that chat messages can appear in the latest message
-        chatLog.insertBefore(newMessageDiv, chatLog.firstChild)
-        console.log("chat logged")
+        if(isNewMessage) {
+            chatLog.insertBefore(newMessageDiv, chatLog.firstChild)
+        }
+        else {
+            chatLog.appendChild(newMessageDiv)
+        }
+
+        if(!maintainPosition) {
+            chatLog.scrollTop = chatLog.scrollHeight
+        }
 
     }
 
