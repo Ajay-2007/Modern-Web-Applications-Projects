@@ -63,15 +63,25 @@ profile-image:hover {
     justify-content: start;
 }
 
+#id_chatroom_loading_spinner{
+    position: absolute;
+}
+
 </style>
 
 {% if debug %}
 PUBLIC CHAT
-<span class="{% if not debug %}d-none{% endif %}page-number" id="id_page_number">1</span>
 {% endif %}
 
+<span class="{% if not debug %}d-none{% endif %}page-number" id="id_page_number">1</span>
 <div class="container">
 	<div class="d-flex flex-column">
+        <div class="d-flex flex-row justify-content-center" id="id_chatroom_loading_spinner_container">
+            <div class="spinner-border text-primary" id="id_chatroom_loading_spinner" role="status" style="display:none;">
+                <span class="sr-only">Loading...</span>
+            </div>
+
+        </div>
 		<div class="d-flex chat-log" id="id_chat_log">
 			
 		</div>
@@ -104,7 +114,8 @@ PUBLIC CHAT
         console.log("Got chat websocket message: " + message.data)
         var data = JSON.parse(message.data);
         
-
+        displayChatroomLoadingSpinner(data.display_progress_bar)
+        
         if(data.error) {
             console.error(data.error + ": " + data.message)
             showClientErrorModal(data.message)
@@ -317,6 +328,16 @@ PUBLIC CHAT
     function showClientErrorModal(message) {
         document.getElementById("id_client_error_modal_body").innerHTML = message
         document.getElementById("id_trigger_client_error_modal").click()
+    }
+
+    function displayChatroomLoadingSpinner(isDisplayed) {
+        var spinner = document.getElementById("id_chatroom_loading_spinner")
+        if(isDisplayed) {
+            spinner.style.display = "block"
+        }
+        else {
+            spinner.style.display = "none"
+        }
     }
 </script>
 

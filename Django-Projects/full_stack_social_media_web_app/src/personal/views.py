@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.conf import settings
 
-DEBUG = True
+DEBUG = False
 
 # Create your views here.
 def home_screen_view(request, *args, **kwargs):
