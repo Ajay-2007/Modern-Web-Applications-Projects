@@ -103,7 +103,13 @@ profile-image:hover {
             
 
             if(data.error) {
+                console.error(data.error + ": " + data.message)
                 showClientErrorModal(data.message)
+                return;
+            }
+
+            if (data.join) {
+                console.log(data.username + " join the room")
             }
 
             if (data.msg_type == 0) {
@@ -114,6 +120,14 @@ profile-image:hover {
 
         public_chat_socket.addEventListener("open", function(e) {
             console.log("Public ChatSocket OPEN")
+
+            // join the chat room
+            if("{{request.user.is_authenticated}}") {
+                public_chat_socket.send(JSON.stringify({
+                    "command": "join",
+                    "room": "{{ room_id }}"
+                }))
+            }
         })
 
         public_chat_socket.onclose = function(e) {
@@ -153,6 +167,7 @@ profile-image:hover {
             public_chat_socket.send(JSON.stringify({
                 "command": "send",
                 "message": message,
+                "room_id": "{{ room_id }}"
             }))
 
             messageInputDom.value = ""
