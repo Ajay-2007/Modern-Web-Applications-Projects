@@ -11,6 +11,46 @@
 	font-size: 0.9em;
 	flex-direction: column-reverse;
 }
+
+.profile-image {
+    width: 33px;
+    height: 33px;
+    margin-top: 0px;
+    margin-bottom: auto;
+}
+
+profile-image:hover {
+    cursor: pointer;
+
+}
+
+.username-span:hover{
+    cursor: pointer;
+
+}
+.username-span{
+    font-weight: 600;
+    margin-top: 0px;
+    margin-bottom: auto;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+.msg-p{
+    font-weight: 450;
+    margin-top: 5px;
+    margin-bottom: auto;
+    margin-left: 5px;
+    margin-right: 5px;
+    white-space: normal;
+    -ms-word-break: break-all;
+    word-break: break-all;
+}
+
+.message-container {
+    margin-top: 10px;
+    justify-content: start;
+}
 </style>
 
 <div class="container">
@@ -121,8 +161,13 @@
         var newMessageDiv = document.createElement("div")
         newMessageDiv.classList.add("d-flex")
         newMessageDiv.classList.add("flex-row")
+        newMessageDiv.classList.add("message-container")
 
         var profileImage = document.createElement("img")
+
+        profileImage.addEventListener("click", function(e) {
+            selectUser(user_id)
+        })
         profileImage.classList.add("profile-image")
         profileImage.classList.add("rounded-circle")
         profileImage.classList.add("image-fluid")
@@ -138,6 +183,11 @@
         div2.classList.add("flex-column")
 
         var usernameSpan = document.createElement("span")
+        usernameSpan.addEventListener("click", function(e) {
+            selectUser(user_id)
+        })
+
+        usernameSpan.classList.add("username-span")
         usernameSpan.innerHTML = username
         div2.appendChild(usernameSpan)
 
@@ -154,6 +204,14 @@
         chatLog.insertBefore(newMessageDiv, chatLog.firstChild)
         console.log("chat logged")
 
+    }
+
+
+    function selectUser(user_id) {
+        var url = "{% url 'account:view' user_id=2342423423423423 %}".replace("2342423423423423", user_id)
+
+        var win = window.open(url, "_blank")
+        win.focus()
     }
 	
 </script>
