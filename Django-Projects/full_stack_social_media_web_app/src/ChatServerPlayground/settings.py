@@ -28,7 +28,7 @@ DEBUG = True
 if DEBUG:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend' # development ONLY
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1"]
 
 # it tells django that the default model that the account we create is account.Account model
 AUTH_USER_MODEL = "account.Account"
@@ -91,7 +91,7 @@ CHANNEL_LAYERS = {
     'default': {
         'BACKEND': 'channels_redis.core.RedisChannelLayer',
         'CONFIG': {
-            'hosts': ['127.0.0.1', '6379']
+            'hosts': [('127.0.0.1', '6379')]
         },
     },
 }

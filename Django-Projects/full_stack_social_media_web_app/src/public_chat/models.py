@@ -20,6 +20,7 @@ class PublicChatRoom(models.Model):
             self.save()
             is_user_added = True
         elif user in self.users.all():
+            
             is_user_added = True
         return is_user_added
 
