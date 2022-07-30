@@ -5,6 +5,7 @@ from django.urls import path
 # from django.core.asgi import get_asgi_application
 
 from public_chat.consumers import PublicChatConsumer
+from chat.consumers import ChatConsumer
 import os
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "ChatServerPlayground.settings")
@@ -16,7 +17,8 @@ application = ProtocolTypeRouter({
     'websocket' : AllowedHostsOriginValidator(
         AuthMiddlewareStack(
             URLRouter([
-                path("public_chat/<room_id>/", PublicChatConsumer)
+                path('chat/<room_id>/', ChatConsumer),
+                path("public_chat/<room_id>/", PublicChatConsumer),
             ])
         )
     ),
