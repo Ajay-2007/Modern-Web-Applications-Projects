@@ -195,12 +195,97 @@
 <!-- Client Error MODAL -->
 
 <script type="text/javascript">
+
+	var chatSocket = null;
+	var roomId = null;
 	onStart()
-	
+
 	function onStart() {
 		{% for x in m_and_f %}
 			preloadImage("{{x.friend.profile_image.url|safe}}", "id_friend_img_{{x.friend.id}}")
 		{% endfor %}
+	}
+
+	function closeWebSocket(){
+		if(chatSocket != null) {
+			chatSocket.close()
+			chatSocket = null;
+		}
+	}
+
+	function setupWebSocket(room_id){
+		console.log("setupWebSocket: " + room_id)
+
+		roomId = room_id
+
+		// close previous Socket
+		closeWebSocket()
+
+		// ws:// or wss://
+		var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+		{% if debug_mode %}
+			var ws_path = ws_scheme + "://" + window.location.host + "/chat/{{room_id}}/"; // development
+		{% else %}
+			var ws_path = ws_scheme + "://" + window.location.host + ":8001/chat/{{room_id}}/"; // production
+		
+		{% endif %}
+
+		chatSocket = new WebSocket(ws_path);
+
+
+		// handle incoming messages
+		chatSocket.onmessage = function(message) {
+			console.log("Got chat websocket message: " + message.data)
+			var data = JSON.parse(message.data);
+			
+			displayChatroomLoadingSpinner(data.display_progress_bar)
+
+			if(data.error) {
+				console.error(data.error + ": " + data.message)
+				return;
+			}
+
+			if (data.join) {
+				console.log(data.username + " join the room")
+			}
+
+			if(data.leave) {
+				console.log("Leaving room: " + data.leave)
+			}
+
+		}
+
+		chatSocket.addEventListener("open", function(e) {
+			console.log("ChatSocket OPEN")
+
+			// join the chat room
+			if("{{request.user.is_authenticated}}") {
+				chatSocket.send(JSON.stringify({
+					"command": "join",
+					"room": "{{ room_id }}"
+				}))
+			}
+		})
+
+		chatSocket.onclose = function(e) {
+			console.log("ChatSocket closed.: ", e)
+		}
+
+		chatSocket.onOpen = function(e) {
+			console.log("ChatSocket onOpen", e)
+		}
+
+		chatSocket.onerror = function(e) {
+			console.log("ChatSocket error: " + str(e))
+		}
+
+		if (chatSocket.readyState == WebSocket.OPEN) {
+			console.log("ChatSocket OPEN")
+		}
+		else if(chatSocket.readyState == WebSocket.CONNECTING){
+			console.log("ChatSocket connecting...")
+		}		
+
 	}
 </script>
 
