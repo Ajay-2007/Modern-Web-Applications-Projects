@@ -1,6 +1,14 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+from friend.models import FriendList
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
+import os
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+
 # create a new user
 # create a superuser
 
@@ -72,3 +80,9 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, app_label):
         return True
+
+
+# we want this to execute after the account has been saved
+@receiver(post_save, sender=Account)
+def user_save(sender, instance, **kwargs):
+    FriendList.objects.get_or_create(user=instance)
