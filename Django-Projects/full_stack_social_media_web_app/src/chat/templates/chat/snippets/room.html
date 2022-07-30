@@ -194,4 +194,14 @@
 </div>
 <!-- Client Error MODAL -->
 
+<script type="text/javascript">
+	onStart()
+	
+	function onStart() {
+		{% for x in m_and_f %}
+			preloadImage("{{x.friend.profile_image.url|safe}}", "id_friend_img_{{x.friend.id}}")
+		{% endfor %}
+	}
+</script>
+
 {% endblock content %}

@@ -1,5 +1,15 @@
 {% load static %}
 
+<style type="text/css">
+    .chat-dropdown-header: hover{
+        cursor: pointer;
+        background: var(--main-background-color);
+    }
+
+    .chat-dropdown-header{
+        color: var(--light-primary-text-color)
+    }
+</style>
 <div class="d-flex p-3 px-md-4 mb-4 bg-white border-bottom shadow-sm">
     <!-- MEDIUM+ screens -->
     <div class="d-none d-md-flex flex-row my-auto flex-grow-1 align-items-center">
@@ -111,6 +121,9 @@
 </div>
 
 <script type="text/javascript">
+
+    setupChatDropdownHeader()
+
     function executeQuery() {
         var query = document.getElementById("id_q_small").value
         if (query == "") {
@@ -119,5 +132,35 @@
 
         window.location.replace("{% url 'search' %}?q=" + query)
         return false;
+    }
+
+
+    function setupChatDropdownHeader() {
+        var notificationContainer = document.getElementById("id_chat_notifications_container")
+
+        if(notificationContainer != null) {
+            var div = document.createElement("div")
+            div.classList.add("chat-dropdown-header", "d-flex", "flex-row", "justify-content-end", "m-auto", "align-items-end")
+            div.addEventListener("click", function(e) {
+                var url = "{% url 'chat:private-chat-room' %}"
+                chatRedirect(url)
+            })
+
+            span1 = document.createElement("span")
+            span1.classList.add("mr-2")
+            span1.innerHTML = "Go to chat"
+            div.appendChild(span1)
+
+            span2 = document.createElement("span")
+            span2.classList.add("material-icons", "mr-2")
+            span2.innerHTML = "open_with"
+            div.appendChild(span2)
+
+            notificationContainer.appendChild(div)
+        }
+    }
+
+    function chatRedirect(url) {
+        window.location.href = url
     }
 </script>
