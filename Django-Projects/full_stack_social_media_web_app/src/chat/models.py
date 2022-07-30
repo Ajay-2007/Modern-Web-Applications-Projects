@@ -10,7 +10,7 @@ class PrivateChatRoom(models.Model):
     user1                   = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user1")
     user2                   = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user2")
 
-    is_active               = models.BooleanField(default=True)
+    is_active               = models.BooleanField(default=False)
 
     def __str__(self):
         return f"A chat between {self.user1.username} and {self.user2}."
@@ -25,7 +25,7 @@ class PrivateChatRoom(models.Model):
 
 class RoomChatMessageManager(models.Manager):
     def by_room(self, room):
-        qs = RoomChatMessage.object.filter(room=room).order_by("-timestamp")
+        qs = RoomChatMessage.objects.filter(room=room).order_by("-timestamp")
         return qs
 
 class RoomChatMessage(models.Model):

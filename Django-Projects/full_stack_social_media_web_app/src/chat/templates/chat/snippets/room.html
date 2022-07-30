@@ -232,9 +232,9 @@
 		// ws:// or wss://
 		var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
 		{% if debug_mode %}
-			var ws_path = ws_scheme + "://" + window.location.host + "/chat/" + room_id + "/"; // development
+			var ws_path = ws_scheme + "://" + window.location.host + "/chat/" + roomId + "/"; // development
 		{% else %}
-			var ws_path = ws_scheme + "://" + window.location.host + ":8001/chat/{{roomId}}/"; // production
+			var ws_path = ws_scheme + "://" + window.location.host + ":8001/chat/" + roomId + "/"; // production
 		
 		{% endif %}
 
@@ -243,10 +243,10 @@
 
 		// handle incoming messages
 		chatSocket.onmessage = function(message) {
-			console.log("Got chat websocket message: " + message.data)
+			console.log("Got websocket message.")
 			var data = JSON.parse(message.data);
 			
-			displayChatroomLoadingSpinner(data.display_progress_bar)
+			displayLoadingSpinner(data.display_progress_bar)
 
 			if(data.error) {
 				console.error(data.error + ": " + data.message)
@@ -254,11 +254,16 @@
 			}
 
 			if (data.join) {
-				console.log(data.username + " join the room")
+				console.log(data.join + " join the room")
+				getUserInfo()
 			}
 
 			if(data.leave) {
 				console.log("Leaving room: " + data.leave)
+			}
+
+			if (data.user_info) {
+				handleUserInfoPayload(data.user_info)
 			}
 
 		}
@@ -270,7 +275,7 @@
 			if("{{request.user.is_authenticated}}") {
 				chatSocket.send(JSON.stringify({
 					"command": "join",
-					"room": "{{ room_id }}"
+					"room": roomId
 				}))
 			}
 		})
@@ -296,6 +301,20 @@
 
 	}
 
+	function getUserInfo() {
+		chatSocket.send(JSON.stringify({
+			"command": "get_user_info",
+			"room_id": roomId,
+		}));
+	}
+
+	function handleUserInfoPayload(user_info) {
+		document.getElementById("id_other_username").innerHTML = user_info['username']
+		document.getElementById("id_other_user_profile_image").classList.remove("d-none")
+		document.getElementById("id_user_info_container").href = "{% url 'account:view' user_id=3423423423423432 %}".replace("3423423423423432", user_info['id'])
+
+		preloadImage(user_info['profile_image'], "id_other_user_profile_image")
+	}
 	function createOrReturnPrivateChat(id){
 		payload = {
 			"csrfmiddlewaretoken":"{{ csrf_token }}",
