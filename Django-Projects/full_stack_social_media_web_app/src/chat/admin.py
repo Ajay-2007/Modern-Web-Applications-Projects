@@ -4,7 +4,7 @@ from django.core.cache import cache
 from django.db import models
 
 
-from .models import PrivateChatRoom, RoomChatMessages
+from .models import PrivateChatRoom, RoomChatMessage
 
 class PublicChatRoomAdmin(admin.ModelAdmin):
     list_display = ['id', 'user1', 'user2']
@@ -47,8 +47,8 @@ class RoomChatMessageAdmin(admin.ModelAdmin):
     paginator = CachingPaginator
 
     class Meta:
-        model = RoomChatMessages
+        model = RoomChatMessage
 
 
 
-admin.site.register(RoomChatMessages, RoomChatMessageAdmin)
+admin.site.register(RoomChatMessage, RoomChatMessageAdmin)

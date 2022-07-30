@@ -25,10 +25,10 @@ class PrivateChatRoom(models.Model):
 
 class RoomChatMessageManager(models.Manager):
     def by_room(self, room):
-        qs = RoomChatMessages.object.filter(room=room).order_by("-timestamp")
+        qs = RoomChatMessage.object.filter(room=room).order_by("-timestamp")
         return qs
 
-class RoomChatMessages(models.Model):
+class RoomChatMessage(models.Model):
     """
     Chat message created by a user inside a room
     """
