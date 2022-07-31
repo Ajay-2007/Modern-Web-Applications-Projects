@@ -211,7 +211,10 @@
 	}
 
 	function onSelectFriend(userId) {
+		console.log("onSelectFriend: " + userId)
 		createOrReturnPrivateChat(userId)
+		clearHighLightedFriend()
+		highlightFriend(userId)
 	}
 
 	function closeWebSocket(){
@@ -564,6 +567,23 @@
 			spinner.style.display = "none"
 		}
 	}
+
+	function highlightFriend(userId) {
+		document.getElementById("id_friend_container_" + userId).style.background = "#f2f2f2"
+	}
+
+	function clearHighLightedFriend() {
+		{% if m_and_f %}
+			{% for x in m_and_f %}
+				document.getElementById("id_friend_container_{{x.friend.id}}").style.background = ""
+			{% endfor %}
+		{% endif %}
+
+		document.getElementById("id_other_user_profile_image").src = "{% static 'codingwithmitch/dummy_image.png' %}"
+		document.getElementById("id_other_username").innerHTML = ""
+	}
+
+
 	function createOrReturnPrivateChat(id){
 		payload = {
 			"csrfmiddlewaretoken":"{{ csrf_token }}",
