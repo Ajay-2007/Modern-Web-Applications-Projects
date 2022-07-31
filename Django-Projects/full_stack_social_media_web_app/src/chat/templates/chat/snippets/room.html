@@ -266,6 +266,11 @@
 				handleUserInfoPayload(data.user_info)
 			}
 
+			// if it's a standard chat message
+			if(data.msg_type == 0) {
+				appendChatMessage(data, false, true)
+			}
+
 		}
 
 		chatSocket.addEventListener("open", function(e) {
@@ -301,6 +306,31 @@
 
 	}
 
+
+    document.getElementById("id_chat_message_input").focus()
+    document.getElementById("id_chat_message_input").onkeyup = function(e) {
+        if(e.keyCode == 13 && e.shiftKey) { // enter + return
+            // handled automatically by textarea
+        }
+        else if(e.keyCode == 13 && !e.shiftKey) { // just ENTER
+            document.getElementById("id_chat_message_submit").click()
+
+        }
+    }
+
+    document.getElementById("id_chat_message_submit").onclick = function(e) {
+        const messageInputDom = document.getElementById("id_chat_message_input")
+        const message = messageInputDom.value
+        chatSocket.send(JSON.stringify({
+            "command": "send",
+            "message": message,
+            "room": roomId
+        }))
+
+        messageInputDom.value = ""
+    };
+
+
 	function getUserInfo() {
 		chatSocket.send(JSON.stringify({
 			"command": "get_user_info",
@@ -320,7 +350,93 @@
 		document.getElementById("id_client_error_modal_body").innerHTML = message
 		document.getElementById("id_trigger_client_error_modal").click()
 	}
-	
+
+	function appendChatMessage(data, maintainPosition, isNewMessage) {
+		messageType = data.msg_type
+
+		msg_id = data.msg_id
+		message = data.message
+		uName = data.username
+		user_id = data.user_id
+		profile_image = data.profile_image
+		timestamp = data.natural_timestamp
+		console.log("append new chat message: " + messageType)
+
+		username = uName + ": "
+
+		msg = message + "\n"
+		createChatMessageElement(msg, msg_id, username, profile_image, user_id, timestamp, maintainPosition, isNewMessage)
+	}
+
+	function createChatMessageElement(msg, msg_id, username, profile_image, user_id, timestamp, maintainPosition, isNewMessage) {
+		var chatLog = document.getElementById("id_chat_log")
+
+		var newMessageDiv = document.createElement("div")
+		newMessageDiv.classList.add("d-flex", "flex-row", "message-container")
+
+		var profileImage = document.createElement("img")
+		profileImage.addEventListener("click", function(e) {
+			selectUser(user_id)
+		})
+
+		profileImage.classList.add("profile-image", "rounded-circle", "img-fluid")
+		profileImage.src = "{% static 'codingwithmitch/dummy_image.png' %}"
+		var profile_image_id = "id_profile_image_" + msg_id
+		profileImage.id = profile_image_id
+
+		newMessageDiv.appendChild(profileImage)
+
+		var div1 = document.createElement("div")
+		div1.classList.add("d-flex", "flex-column")
+
+		var div2 = document.createElement("div")
+		div2.classList.add("d-flex", "flex-row")
+
+		var usernameSpan = document.createElement("span")
+		usernameSpan.innerHTML = username
+		usernameSpan.classList.add("username-span")
+		usernameSpan.addEventListener("click", function(e) {
+			selectUser(user_id)
+		})
+
+		div2.appendChild(usernameSpan)
+
+		var timestampSpan = document.createElement("span")
+
+		timestampSpan.innerHTML = timestamp
+		timestampSpan.classList.add("d-flex", "align-items-center", "timestamp-span")
+		timestampSpan.addEventListener("click", function(e) {
+			selectUser(user_id)
+		})
+
+		div2.appendChild(timestampSpan)
+
+		div1.appendChild(div2)
+
+		var msgP = document.createElement("p")
+		msgP.innerHTML = validateText(msg)
+
+		msgP.classList.add("msg-p")
+		div1.appendChild(msgP)
+
+		newMessageDiv.appendChild(div1)
+
+		if(isNewMessage) {
+			chatLog.insertBefore(newMessageDiv, chatLog.firstChild)
+		} else {
+			chatLog.appendChild(newMessageDiv)
+		}
+
+		// we do want to scroll the scrollbar
+		if(!maintainPosition) {
+			chatLog.scrollTop = chatLog.scrollHeight
+		}
+
+		preloadImage(profile_image, profile_image_id)
+	}
+
+
+
 	function createOrReturnPrivateChat(id){
 		payload = {
 			"csrfmiddlewaretoken":"{{ csrf_token }}",

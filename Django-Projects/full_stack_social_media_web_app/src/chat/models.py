@@ -37,7 +37,7 @@ class RoomChatMessage(models.Model):
     timestamp               = models.DateTimeField(auto_now_add=True)
     content                 = models.TextField(unique=False, blank=False)
 
-    object = RoomChatMessageManager()
+    objects = RoomChatMessageManager()
 
     def __str__(self):
         return self.content

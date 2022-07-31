@@ -1,12 +1,15 @@
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
 from django.core.serializers import serialize
-
+from django.utils import timezone
 import json
 from chat.models import RoomChatMessage, PrivateChatRoom
 from friend.models import FriendList
 from account.utils import LazyAccountEncoder
 from chat.exceptions import ClientError
+
+from chat.utils import calculate_timestamp
+from chat.constants import *
 
 
 class ChatConsumer(AsyncJsonWebsocketConsumer):
@@ -36,9 +39,12 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                 await self.join_room(content['room'])
 
             elif command == "leave":
-                pass
+                await self.leave_room(content['room'])
             elif command == "send":
-                pass
+                # if len(content['message'].lstrip()) == 0:
+                #     raise ClientError(422, "You can't send an empty message.")
+                if len(content['message'].lstrip()) != 0:
+                    await self.send_room(content['room'], content['message'])
             elif command == "get_room_chat_messages":
                 pass
             elif command == "get_user_info":
@@ -48,7 +54,7 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
                     payload = json.loads(payload)
                     await self.send_user_info_payload(payload['user_info'])
                 else:
-                    raise ClientError("Something went wrong retrieving the other users account details.")
+                    raise ClientError("INVALID_PAYLOAD", "Something went wrong retrieving the other users account details.")
         except ClientError as e:
             await self.handle_client_error(e)
     
@@ -58,7 +64,11 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         """
         # Leave the room
         print("ChatConsumer: disconnect")
-        pass
+        try:
+            if self.room_id != None:
+                await self.leave_room(self.room_id)
+        except Exception as e:
+            pass
 
     async def join_room(self, room_id):
         """
@@ -72,6 +82,16 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         except ClientError as e:
             return await self.handle_client_error(e)
         
+        # Store that we're in the room
+        self.room_id = room.id
+
+        # Add them to the group, so they get room messages
+        await self.channel_layer.group_add(
+            room.group_name,
+            self.channel_name
+        )
+
+
         await self.send_json({
             "join": str(room.id),
         })
@@ -82,12 +102,58 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         """
         # The logged-in user is in our scope thanks to the authnetication AGSI middleware
         print("ChatConsumer: leave_room")
+        room = await get_room_or_error(room_id, self.scope['user'])
+
+        # Notify the group that someone left
+        await self.channel_layer.group_send(
+            room.group_name,
+            {
+                "type": "chat.leave", # chat_leave
+                "room_id": room_id,
+                "profile_image": self.scope['user'].profile_image.url,
+                "username": self.scope['user'].username,
+                "user_id": self.scope['user'].id,
+            }
+        )
+
+        self.room_id = None
+
+        # Remove them from the group so they no longer get room messages
+        await self.channel_layer.group_discard(
+            room.group_name,
+            self.channel_name
+        )
+
+        await self.send_json({
+            "leave": str(room.id)
+        })
+
     
     async def send_room(self, room_id, message):
         """
         Called by receive_json when someone sends a message to a room.
         """
         print("ChatConsumer: send_room")
+        if self.room_id != None:
+            if str(room_id) != str(self.room_id):
+                raise ClientError("ROOM_ACCESS_DENIED", "Room access denied")
+        else:
+            raise ClientError("ROOM_ACCESS_DENIED", "Room access denied")
+        
+        room = await get_room_or_error(room_id, self.scope['user'])
+
+        await create_room_chat_message(room, self.scope['user'], message)
+
+        await self.channel_layer.group_send(
+            room.group_name,
+            {
+                'type': 'chat.message', # chat_message
+                'profile_image': self.scope['user'].profile_image.url,
+                'username': self.scope['user'].username,
+                'user_id': self.scope['user'].id,
+                'message': message,
+            }
+        )
     
     # These helper methods are named by the types we send - so that.json becomes chat_json
     async def chat_join(self, event):
@@ -110,6 +176,18 @@ class ChatConsumer(AsyncJsonWebsocketConsumer):
         """
         # Send a message down to the client
         print("ChatConsumer: chat_message")
+
+        timestamp = calculate_timestamp(timezone.now())
+
+        await self.send_json({
+            "msg_type": MSG_TYPE_MESSAGE,
+            "username": event['username'],
+            "user_id": event['user_id'],
+            "profile_image": event['profile_image'],
+            "message": event["message"],
+            "natural_timestamp": timestamp,
+
+        })
     
     async def send_messages_payload(self, messages, new_page_number):
         """
@@ -155,17 +233,17 @@ def get_room_or_error(room_id, user):
     try:
         room = PrivateChatRoom.objects.get(pk=room_id)
     except PrivateChatRoom.DoesNotExist:
-        raise ClientError("Invalid room.")
+        raise ClientError("INVALID_ROOM", "Invalid room.")
     
     # Is this user allowed into this room?
     if user != room.user1 and user != room.user2:
-        raise ClientError("You do not have permission to join this room.")
+        raise ClientError("ROOM_ACCESS_DENIED", "You do not have permission to join this room.")
 
     # Are the users in this room friends
     friend_list = FriendList.objects.get(user=user).friends.all()
     if not room.user1 in friend_list:
         if not room.user2 in friend_list:
-            raise ClientError("You must be friends to chat.")
+            raise ClientError("ROOM_ACCESS_DENIED", "You must be friends to chat.")
     return room
 
 
@@ -191,3 +269,7 @@ def get_user_info(room, user):
         raise e
     
     return None
+
+@database_sync_to_async
+def create_room_chat_message(room, user, message):
+    return RoomChatMessage.objects.create(user=user, room=room, content=message)
