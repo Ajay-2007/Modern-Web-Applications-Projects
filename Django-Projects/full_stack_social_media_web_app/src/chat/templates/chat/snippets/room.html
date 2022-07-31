@@ -220,6 +220,7 @@
 			chatSocket = null;
 			clearChatLog()
 			setPageNumber("1")
+			disableChatLogScrollListener()
 		}
 	}
 
@@ -259,6 +260,7 @@
 				console.log(data.join + " join the room")
 				getUserInfo()
 				getRoomChatMessages()
+				enableChatLogScrollListener()
 			}
 
 			if(data.leave) {
@@ -535,6 +537,21 @@
 		// var win = window.open(url)
 		var win = window.location.replace(url)
 		win.focus()
+	}
+
+	function chatLogScrollListener(e) {
+		var chatLog = document.getElementById("id_chat_log")
+		if ((Math.abs(chatLog.scrollTop) + 2) >= (chatLog.scrollHeight - chatLog.offsetHeight)) {
+			getRoomChatMessages()
+		}
+	}
+
+	function enableChatLogScrollListener() {
+		document.getElementById("id_chat_log").addEventListener("scroll", chatLogScrollListener)
+	}
+
+	function disableChatLogScrollListener() {
+		document.getElementById("id_chat_log").removeEventListener("scroll", chatLogScrollListener)
 	}
 	function createOrReturnPrivateChat(id){
 		payload = {
