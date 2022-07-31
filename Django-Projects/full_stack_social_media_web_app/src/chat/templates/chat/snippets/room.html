@@ -267,7 +267,9 @@
 			}
 
 			// if it's a standard chat message
-			if(data.msg_type == 0) {
+			// 1 - enter case
+			// 2 - leave case
+			if(data.msg_type == 0 || data.msg_type == 1 || data.msg_type == 2) {
 				appendChatMessage(data, false, true)
 			}
 
@@ -362,10 +364,59 @@
 		timestamp = data.natural_timestamp
 		console.log("append new chat message: " + messageType)
 
-		username = uName + ": "
+		switch(messageType) {
+			case 0:
+				username = uName + ": "
+				msg = message + "\n"
+				createChatMessageElement(msg, msg_id, username, profile_image, user_id, timestamp, maintainPosition, isNewMessage)
+				break;
+			case 1: // user joins the chat
+				createConnectedDisconnectedElement(message, msg_id, profile_image, user_id)
+				break;
 
-		msg = message + "\n"
-		createChatMessageElement(msg, msg_id, username, profile_image, user_id, timestamp, maintainPosition, isNewMessage)
+			case 2: // user leaves the chat
+				createConnectedDisconnectedElement(message, msg_id, profile_image, user_id)
+				break;
+			default:
+				console.log("unsupported message type!")
+				return
+
+		}
+		
+	}
+
+
+	function createConnectedDisconnectedElement(msg, msg_id, profile_image, user_id) {
+		var chatLog = document.getElementById("id_chat_log")
+
+		var newMessageDiv = document.createElement("div")
+		newMessageDiv.classList.add("d-flex", "flex-row", "message-container")
+
+		var profileImage = document.createElement("img")
+		profileImage.addEventListener("click", function(e) {
+			selectUser(user_id)
+		})
+
+		profileImage.classList.add("profile-image", "rounded-circle", "img-fluid")
+		profileImage.src = "{% static 'codingwithmitch/dummy_image.png' %}"
+		var profile_image_id = "id_profile_image_" + msg_id
+		profileImage.id = profile_image_id
+
+		newMessageDiv.appendChild(profileImage)
+
+		var usernameSpan = document.createElement("span")
+		usernameSpan.innerHTML = msg
+		usernameSpan.classList.add("username-span")
+		usernameSpan.addEventListener("click", function(e) {
+			selectUser(user_id)
+		})
+
+		newMessageDiv.appendChild(usernameSpan)
+
+		chatLog.insertBefore(newMessageDiv, chatLog.firstChild)
+
+		preloadImage(profile_image, profile_image_id)
+
 	}
 
 	function createChatMessageElement(msg, msg_id, username, profile_image, user_id, timestamp, maintainPosition, isNewMessage) {
