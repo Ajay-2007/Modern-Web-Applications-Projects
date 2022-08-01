@@ -121,6 +121,43 @@
 </div>
 
 <script type="text/javascript">
+    // Correctly decide between ws:// and wss://
+    var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+    // development
+    var ws_path = ws_scheme + "://" + window.location.host + "/";
+    // production
+    // var ws_path = ws_scheme + "://" + window.location.host + ":8001/"; 
+
+    var notificationSocket = new WebSocket(ws_path);
+
+    notificationSocket.onmessage = function(message) {
+        console.log("Got notification websocket message.")
+        var data = JSON.parse(message.data)
+    }
+
+    notificationSocket.onclose = function(e) {
+        console.log("Notification socket closed unexpectedly.")
+    }
+
+
+    notificationSocket.onopen = function(e) {
+        console.log("Notification socket on open: " + e)
+    }
+
+
+    notificationSocket.onerror = function(e) {
+        console.error("Notification socket error", e)
+    }
+
+    if (notificationSocket.readyState == WebSocket.OPEN) {
+        console.log("Notification socket OPEN complete.")
+    }
+    else if(notificationSocket.readyState == WebSocket.CONNECTING) {
+        console.log("Notification socket connecting...")
+    }
+
+</script>
+<script type="text/javascript">
 
     setupChatDropdownHeader()
 
