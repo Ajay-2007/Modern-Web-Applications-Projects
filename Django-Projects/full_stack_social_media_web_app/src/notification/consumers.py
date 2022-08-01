@@ -65,6 +65,15 @@ class NotificationConsumer(AsyncJsonWebsocketConsumer):
 					payload = json.loads(payload)
 					await self.send_updated_friend_request_notification(payload['notification'])
 
+			elif command == "decline_friend_request":
+				notification_id = content['notification_id']
+				payload = await decline_friend_request(self.scope['user'], notification_id)
+				if payload == None:
+					raise ClientError(204, "Something went wrong. Try refreshing the browser.")
+				else:
+					payload = json.loads(payload)
+					await self.send_updated_friend_request_notification(payload['notification'])
+
 		except ClientError as e:
 			print("EXCEPTION: receive_json: " + str(e))
 			pass
@@ -154,3 +163,25 @@ def accept_friend_request(user, notification_id):
 			raise ClientError(422, "An error occurred with that notification, Try refreshing the browser.")
 		
 		return None
+
+
+@database_sync_to_async
+def decline_friend_request(user, notification_id):
+	"""
+	Decline a friend request
+	"""
+	payload = {}
+	if user.is_authenticated:
+		try:
+			notification = Notification.objects.get(pk=notification_id)
+			friend_request = notification.content_object
+			# confirm this is the correct user
+			if friend_request.receiver == user:
+				updated_notification = friend_request.decline()
+				s = LazyNotificationEncoder()
+				payload['notification'] = s.serialize([updated_notification])[0]
+				return json.dumps(payload)
+		except Notification.DoesNotExist:
+			raise ClientError(422, "An error occurred with that notification, Try refreshing the browser.")
+		
+		return None		
