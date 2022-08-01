@@ -16,7 +16,7 @@ class LazyNotificationEncoder(Serializer):
 
         if obj.get_content_object_type() == "FriendRequest":
             dump_object.update({'notification_type': obj.get_content_object_type()})
-            dump_object.update({'notification_id': str(obj.id)})
+            dump_object.update({'notification_id': str(obj.pk)})
             dump_object.update({'verb': str(obj.verb)})
             dump_object.update({'is_active': str(obj.content_object.is_active)})
             dump_object.update({'is_read': str(obj.read)})
@@ -33,7 +33,7 @@ class LazyNotificationEncoder(Serializer):
         if obj.get_content_object_type() == "FriendList":
 
             dump_object.update({'notification_type': obj.get_content_object_type()})
-            dump_object.update({'notification_id': str(obj.id)})
+            dump_object.update({'notification_id': str(obj.pk)})
             dump_object.update({'verb': str(obj.verb)})
             dump_object.update({'is_read': str(obj.read)})
             dump_object.update({'natural_timestamp': str(naturaltime(obj.timestamp))})

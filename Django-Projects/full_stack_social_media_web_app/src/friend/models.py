@@ -19,7 +19,7 @@ class FriendList(models.Model):
     friends                 = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="friends")
 
     # Fore reverse lookups
-    notification            = GenericRelation(Notification)
+    notifications            = GenericRelation(Notification)
     def __str__(self):
         return self.user.username
 
@@ -31,7 +31,7 @@ class FriendList(models.Model):
             self.friends.add(account)
             self.save()
 
-            content_type = ContentType.objects.get_from_model(self)
+            content_type = ContentType.objects.get_for_model(self)
             # Create notification
             # Notification(
             #     target=self.user,
@@ -48,7 +48,6 @@ class FriendList(models.Model):
                 redirect_url=f"{settings.BASE_URL}/account/{account.pk}/",
                 verb=f"You are now friends with {account.username}.",
                 content_type=content_type,
-                object_id=self.id,
             )
             self.save()
 
@@ -85,7 +84,7 @@ class FriendList(models.Model):
         friends_list.remove_friend(remove_friends_list.user)
 
 
-        content_type = ContentType.objects.get_from_model(self)
+        content_type = ContentType.objects.get_for_model(self)
 
         # Create notification for removee
         self.notifications.create(
@@ -161,6 +160,7 @@ class FriendRequest(models.Model):
             receiver_notification.verb = f"You accepeted {self.sender.username}'s friend request."
             receiver_notification.timestamp = timezone.now()
             receiver_notification.save()
+
             receiver_friend_list.add_friend(self.sender)
 
             sender_friend_list = FriendList.objects.get(user=self.sender)
