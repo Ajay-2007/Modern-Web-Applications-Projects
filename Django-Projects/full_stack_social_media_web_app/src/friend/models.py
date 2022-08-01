@@ -1,3 +1,5 @@
+from django.contrib.contenttypes.fields import GenericRelation
+from django.contrib.contenttypes.models import ContentType
 from django.db import models
 from django.conf import settings
 from django.dispatch import receiver
@@ -5,6 +7,7 @@ from django.utils import timezone
 
 
 from chat.utils import find_or_create_private_chat
+from notification.models import Notification
 
 class FriendList(models.Model):
 
@@ -12,6 +15,8 @@ class FriendList(models.Model):
     user                    = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="user")
     friends                 = models.ManyToManyField(settings.AUTH_USER_MODEL, blank=True, related_name="friends")
 
+    # Fore reverse lookups
+    notification            = GenericRelation(Notification)
     def __str__(self):
         return self.user.username
 
@@ -61,6 +66,13 @@ class FriendList(models.Model):
             return True
         return False
 
+    @property
+    def get_cname(self):
+        """
+        For determining what kind of object is associated with a Notification
+        """
+        return "FriendList"
+
 
 class FriendRequest(models.Model):
     """
@@ -76,6 +88,8 @@ class FriendRequest(models.Model):
     receiver                        = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="receiver")
     is_active                       = models.BooleanField(blank=False, null=False, default=True)
     timestamp                       = models.DateTimeField(auto_now_add=True)
+
+    notifications                   = GenericRelation(Notification)
 
     def __str__(self):
         return self.sender.username
@@ -111,3 +125,11 @@ class FriendRequest(models.Model):
         """
         self.is_active = False
         self.save()
+
+    
+    @property
+    def get_cname(self):
+        """
+        For determining what kind of object is associated with a Notification
+        """
+        return "FriendList"
