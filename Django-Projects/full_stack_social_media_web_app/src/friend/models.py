@@ -224,14 +224,23 @@ class FriendRequest(models.Model):
 
         content_type = ContentType.objects.get_for_model(self)
 
-        # Update notification for RECEIVER
-        receiver_notification = Notification.objects.get(target=self.receiver, content_type=content_type, object_id=self.id)
+        # # Update notification for RECEIVER
+        # receiver_notification = Notification.objects.get(target=self.receiver, content_type=content_type, object_id=self.id)
 
-        receiver_notification.is_active = False
-        receiver_notification.redirect_url = f"{settings.BASE_URL}/account/{self.sender.pk}/"
-        receiver_notification.verb = f"{self.sender.username} cancelled the friend request sent to you."
-        receiver_notification.timestamp = timezone.now()
-        receiver_notification.save() 
+        # receiver_notification.is_active = False
+        # receiver_notification.redirect_url = f"{settings.BASE_URL}/account/{self.sender.pk}/"
+        # receiver_notification.verb = f"{self.sender.username} cancelled the friend request sent to you."
+        # receiver_notification.timestamp = timezone.now()
+        # receiver_notification.save() 
+
+        # # Create notification for SENDER
+        # self.notifications.create(
+        #     target=self.sender,
+        #     from_user=self.receiver,
+        #     redirect_url=f"{settings.BASE_URL}/account/{self.receiver.pk}/",
+        #     verb=f"You cancelled the friend request to {self.receiver.username}",
+        #     content_type=content_type,                    
+        # )
 
         # Create notification for SENDER
         self.notifications.create(
@@ -242,6 +251,17 @@ class FriendRequest(models.Model):
             content_type=content_type,                    
         )
 
+        # Update notification for RECEIVER
+        receiver_notification = Notification.objects.get(target=self.receiver, content_type=content_type, object_id=self.id)
+
+        # receiver_notification.is_active = False
+        receiver_notification.redirect_url = f"{settings.BASE_URL}/account/{self.sender.pk}/"
+        receiver_notification.verb = f"{self.sender.username} cancelled the friend request sent to you."
+        receiver_notification.read = False
+        receiver_notification.save() 
+
+
+
 
     
     @property
@@ -249,7 +269,7 @@ class FriendRequest(models.Model):
         """
         For determining what kind of object is associated with a Notification
         """
-        return "FriendList"
+        return "FriendRequest"
 
 
 

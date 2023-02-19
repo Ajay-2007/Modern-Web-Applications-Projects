@@ -132,6 +132,10 @@
 			setGeneralPaginationExhausted()
 		}
 
+		if(data.general_msg_type == 2) {
+			refreshGeneralNotificationsData(data.notifications)
+		}
+
 		if(data.general_msg_type == 5) {
 			updateGeneralNotificationDiv(data['notification'])
 		}
