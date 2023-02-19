@@ -10,10 +10,10 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
-from pathlib import Path
-from dotenv import load_dotenv
 import os
+from pathlib import Path
 
+from dotenv import load_dotenv
 
 load_dotenv()
 
@@ -38,14 +38,17 @@ DEBUG = True
 # Application definition
 
 INSTALLED_APPS = [
-    "django.contrib.admin",
-    "django.contrib.auth",
-    "django.contrib.contenttypes",
-    "django.contrib.sessions",
-    "django.contrib.messages",
-    "django.contrib.staticfiles",
+"django.contrib.admin",
+"django.contrib.auth",
+"django.contrib.contenttypes",
+"django.contrib.sessions",
+"django.contrib.messages",
+"django.contrib.staticfiles",
 
-    # External Packages
+# External Packages
+
+
+
     'rest_framework'
     # Internal Apps
 ]
