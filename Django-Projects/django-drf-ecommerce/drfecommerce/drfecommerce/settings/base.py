@@ -45,12 +45,11 @@ INSTALLED_APPS = [
 "django.contrib.messages",
 "django.contrib.staticfiles",
 
-# External Packages
 
-
-
-    'rest_framework'
+    # External Packages
+    "rest_framework",
     # Internal Apps
+    "drfecommerce.product",
 ]
 
 MIDDLEWARE = [

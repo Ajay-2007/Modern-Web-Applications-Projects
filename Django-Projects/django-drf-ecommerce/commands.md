@@ -8,3 +8,6 @@
 
 - Running the Server
   `python3 manage.py runserver'
+
+mkdir ./drfcommerce/product
+python manage.py startapp product ./drfecommerce/product
