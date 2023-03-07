@@ -1,2 +1,9 @@
 # login to postgres database
 sudo -i -u postgres
+
+# everytime we add new static files we have to run this command
+python manage.py collectstatic
+
+
+create database codingwithmitch_chat_dev;
+grant all privileges on database codingwithmitch_chat_dev to django;
