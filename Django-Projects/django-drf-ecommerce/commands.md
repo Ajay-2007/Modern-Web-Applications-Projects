@@ -11,3 +11,4 @@
 
 mkdir ./drfcommerce/product
 python manage.py startapp product ./drfecommerce/product
+python manage.py createsuperuser
